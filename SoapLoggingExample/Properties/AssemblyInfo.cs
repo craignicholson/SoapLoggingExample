@@ -44,5 +44,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 // Manually Add of log4net by Craig Nicholson
-// [assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.config")]
 [assembly: log4net.Config.XmlConfigurator(ConfigFile = "Log4net.config", Watch = true)]

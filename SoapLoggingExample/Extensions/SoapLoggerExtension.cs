@@ -28,18 +28,18 @@ namespace SoapLoggingExample.Extensions
         private static readonly log4net.ILog Logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
-        /// The _ old stream.
+        /// The old stream coming into this extension when we make a soap request.  See ChainStream.
         /// </summary>
         private Stream oldStream;
 
         /// <summary>
-        /// The _ new stream.
+        /// The new stream which will hold our copy of the old stream???  What's going on here please?
         /// </summary>
         private Stream newStream;
 
         /// <inheritdoc />
         /// <summary>
-        /// The chain stream.
+        /// The chain stream when overridden in a derived class, allows a SOAP extension access to the memory buffer containing the SOAP request or response.
         /// </summary>
         /// <param name="stream">
         /// The stream.
@@ -112,9 +112,11 @@ namespace SoapLoggingExample.Extensions
         /// </param>
         public override void ProcessMessage(SoapMessage message)
         {
-            Logger.Debug(message.Stage);
-            Logger.Debug(message.SoapVersion);
+            // Log some informational items for reviewing in this sample application.
+            Logger.Debug($"Stage : {message.Stage}");
+
             switch (message.Stage)
+
             {
                 case SoapMessageStage.BeforeSerialize:
                     break;
@@ -132,7 +134,7 @@ namespace SoapLoggingExample.Extensions
         }
 
         /// <summary>
-        /// The write output.
+        /// Write the output of the outgoing soap request.
         /// </summary>
         /// <param name="message">
         /// The message.
@@ -142,14 +144,19 @@ namespace SoapLoggingExample.Extensions
             this.newStream.Position = 0;
             var reader = new StreamReader(this.newStream);
             var requestXml = reader.ReadToEnd();
-            Logger.Debug($"{"REQUEST"} | {requestXml.TrimEnd('\r', '\n') }");
+
+            // Trimming the end of the string b/c some of my requests and responses had newlines :-(
+            Logger.Debug($"Request | {requestXml.TrimEnd('\r', '\n') }");
+ 
+            // Example of the using PrettyXml
+            // Logger.Debug(this.PrettyXml(requestXml));
             this.newStream.Position = 0;
             CopyStream(this.newStream, this.oldStream);
             this.newStream.Position = 0;
         }
 
         /// <summary>
-        /// The write input.
+        /// Write the input of the incoming soap response.
         /// </summary>
         /// <param name="message">
         /// The message.
@@ -160,28 +167,19 @@ namespace SoapLoggingExample.Extensions
             this.newStream.Position = 0;
             var reader = new StreamReader(this.newStream);
             var requestXml = reader.ReadToEnd();
-            Logger.Debug($"{"RESPONSE"} | {requestXml.TrimEnd('\r', '\n') }");
+
+            // Trimming the end of the string b/c some of my requests and responses had newlines :-(
+            Logger.Debug($"Response | {requestXml.TrimEnd('\r', '\n') }");
+            
+            // Example of the using PrettyXml
+            // Logger.Debug(this.PrettyXml(requestXml));
             this.newStream.Position = 0;
         }
 
         /// <summary>
-        /// The log.
-        /// </summary>
-        /// <param name="requestXml">
-        /// The request Xml.
-        /// </param>
-        public void PrettyXml(string requestXml)
-        {
-            this.newStream.Position = 0;
-            if (!string.IsNullOrWhiteSpace(requestXml))
-            {
-                var prettyXml = XDocument.Parse(requestXml);
-                Logger.Debug($"Formatted | \n{prettyXml}");
-            }
-        }
-
-        /// <summary>
-        /// The copy stream.
+        /// Copy Stream puts the contents of the toStream into the fromStream.
+        /// We are swapping the oldStream and newStream so we can get the request 
+        /// and response from the soap message.
         /// </summary>
         /// <param name="fromStream">
         /// The from stream.
@@ -204,6 +202,20 @@ namespace SoapLoggingExample.Extensions
                 var message = $"CopyStream failed because: {ex.Message}";
                 Logger.Error(message, ex);
             }
+        }
+
+        /// <summary>
+        /// Format the Xml to be pretty for humans.
+        /// </summary>
+        /// <param name="requestXml">
+        /// The request Xml.
+        /// </param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        private string PrettyXml(string requestXml)
+        {
+            return XDocument.Parse(requestXml).ToString();
         }
     }
 }
