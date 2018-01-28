@@ -14,7 +14,7 @@ namespace SoapLoggingExample
     using System.Net;
 
     /// <summary>
-    /// EExample program to demonstrate capturing a soap request and response.
+    /// Example program to demonstrate capturing a soap request and response.
     /// </summary>
     public class Program
     {
@@ -24,7 +24,7 @@ namespace SoapLoggingExample
         private static readonly log4net.ILog Logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
-        /// The main.
+        /// Main entry point of the program.
         /// </summary>
         /// <param name="args">
         /// The args.
@@ -41,7 +41,7 @@ namespace SoapLoggingExample
         }
 
         /// <summary>
-        /// The call web service.
+        /// Call your own web service.  This example is for MultiSpeak Standard.
         /// </summary>
         private static void CallWebService()
         {

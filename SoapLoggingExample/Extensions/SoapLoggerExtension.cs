@@ -33,7 +33,7 @@ namespace SoapLoggingExample.Extensions
         private Stream oldStream;
 
         /// <summary>
-        /// The new stream which will hold our copy of the old stream???  What's going on here please?
+        /// The new stream which will hold our copy of the old stream when swapping places.
         /// </summary>
         private Stream newStream;
 
@@ -57,7 +57,7 @@ namespace SoapLoggingExample.Extensions
 
         /// <inheritdoc />
         /// <summary>
-        /// The get initializer.
+        /// The get initializer, see documentation reference.
         /// </summary>
         /// <param name="methodInfo">
         /// The method info.
@@ -76,7 +76,7 @@ namespace SoapLoggingExample.Extensions
 
         /// <inheritdoc />
         /// <summary>
-        /// The get initializer.
+        /// Another get initializer, see documentation reference.
         /// </summary>
         /// <param name="serviceType">
         /// The service type.
@@ -92,7 +92,7 @@ namespace SoapLoggingExample.Extensions
 
         /// <inheritdoc />
         /// <summary>
-        /// The initialize.
+        /// The initialize, see documentation reference.
         /// </summary>
         /// <param name="initializer">
         /// The initializer.
@@ -105,10 +105,10 @@ namespace SoapLoggingExample.Extensions
 
         /// <inheritdoc />
         /// <summary>
-        /// The process message.
+        /// ProcessMessage processes the soap message.
         /// </summary>
         /// <param name="message">
-        /// The message.
+        /// The incoming soap message.
         /// </param>
         public override void ProcessMessage(SoapMessage message)
         {
@@ -182,10 +182,10 @@ namespace SoapLoggingExample.Extensions
         /// and response from the soap message.
         /// </summary>
         /// <param name="fromStream">
-        /// The from stream.
+        /// The from stream, the value we want to copy to the toStream.
         /// </param>
         /// <param name="toStream">
-        /// The to stream.
+        /// The to stream, which is change to the value of the fromStream.
         /// </param>
         private static void CopyStream(Stream fromStream, Stream toStream)
         {

@@ -1,5 +1,7 @@
 # SoapLoggingExample
 
+by Craig Nicholson
+
 ## Problem
 
 Sometimes when sending web requests or soap messages you might need to track the
@@ -10,7 +12,7 @@ a Soap Extension and use log4net to log the request and response streams.
 
 - log4net
 - System.Web.Services
-- Your own web service (soap)  for .net folks thi is a .asmx or wcf (.svc)
+- Your own web service (soap)  for .net folks this is a .asmx or wcf (.svc)
 
 ## log4net Settup
 
@@ -21,6 +23,26 @@ a Soap Extension and use log4net to log the request and response streams.
 ```C#
 // Manually Add of log4net by Craig Nicholson
 [assembly: log4net.Config.XmlConfigurator(ConfigFile = "Log4net.config", Watch = true)]
+```
+
+## App.Config Setup
+
+Add the extension you created to the app config.  Below is the example in the application.
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <startup>
+    <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.6.1" />
+  </startup>
+  <system.web>
+    <webServices>
+      <soapExtensionTypes>
+        <add type="SoapLoggingExample.Extensions.SoapLoggerExtension, SoapLoggingExample" priority="2" group="Low" />
+      </soapExtensionTypes>
+    </webServices>
+  </system.web>
+</configuration>
 ```
 
 ## How this works
@@ -123,5 +145,5 @@ If you wish to output a more readable format use PrettyXml.
 
 ## References
 
-[How to: Implement a SOAP Extension](https://msdn.microsoft.com/en-us/library/7w06t139(v=vs.100).aspx)
-[How to: Implement the ChainStream Method to Save References to Stream Objects](https://msdn.microsoft.com/en-us/library/eyxt5kaw(v=vs.100).aspx)
+1. [How to: Implement a SOAP Extension](https://msdn.microsoft.com/en-us/library/7w06t139(v=vs.100).aspx)
+1. [How to: Implement the ChainStream Method to Save References to Stream Objects](https://msdn.microsoft.com/en-us/library/eyxt5kaw(v=vs.100).aspx)
