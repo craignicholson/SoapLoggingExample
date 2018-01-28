@@ -14,7 +14,7 @@ a Soap Extension and use log4net to log the request and response streams.
 - System.Web.Services
 - Your own web service (soap)  for .net folks this is a .asmx or wcf (.svc)
 
-## log4net Settup
+## log4net Setup
 
 - Add log4net via NuGet
 - Add log4net.config file
@@ -23,6 +23,44 @@ a Soap Extension and use log4net to log the request and response streams.
 ```C#
 // Manually Add of log4net by Craig Nicholson
 [assembly: log4net.Config.XmlConfigurator(ConfigFile = "Log4net.config", Watch = true)]
+```
+
+## log4net.config
+
+Review the log4net sight for more information on patterns.  This config has two appenders.
+A console appender to write the output to the console and file appender to write the same
+output to a file.
+
+The log files will be found in your build directory.
+
+> ..\SoapLoggingExample\SoapLoggingExample\bin\Debug
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<log4net>
+  <appender name="ConsoleAppender" type="log4net.Appender.ConsoleAppender">
+    <layout type="log4net.Layout.PatternLayout">
+      <conversionPattern value="%date{ISO8601} | %M | %message%newline" />
+    </layout>
+  </appender>
+  <appender name="LogFileAppender" type="log4net.Appender.RollingFileAppender,log4net">
+    <param name="File" value="logs/SoapLoggingExample.log"/>
+    <lockingModel type="log4net.Appender.FileAppender+MinimalLock,log4net" />
+    <appendToFile value="true" />
+    <rollingStyle value="Size" />
+    <maxSizeRollBackups value="2" />
+    <maximumFileSize value="1MB" />
+    <staticLogFileName value="true" />
+    <layout type="log4net.Layout.PatternLayout,log4net">
+      <param name="ConversionPattern" value="%date{ISO8601} | %M | %message%newline"/>
+    </layout>
+  </appender>
+  <root>
+    <level value="ALL" />
+    <appender-ref ref="ConsoleAppender" />
+    <appender-ref ref="LogFileAppender" />
+  </root>
+</log4net>
 ```
 
 ## App.Config Setup
