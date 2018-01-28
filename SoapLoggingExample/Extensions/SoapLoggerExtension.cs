@@ -153,7 +153,7 @@ namespace SoapLoggingExample.Extensions
             if (!string.IsNullOrWhiteSpace(requestXml))
             {
                 var prettyXml = XDocument.Parse(requestXml);
-                Logger.Debug($"\n{prettyXml}");
+                Logger.Debug($"Formatted | \n{prettyXml}");
             }
         }
 
