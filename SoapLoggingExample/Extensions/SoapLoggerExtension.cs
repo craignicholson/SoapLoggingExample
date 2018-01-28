@@ -30,12 +30,30 @@ namespace SoapLoggingExample.Extensions
         /// <summary>
         /// The _ old stream.
         /// </summary>
-        private Stream requestStream;
+        private Stream oldStream;
 
         /// <summary>
         /// The _ new stream.
         /// </summary>
-        private Stream responseStream;
+        private Stream newStream;
+
+        /// <inheritdoc />
+        /// <summary>
+        /// The chain stream.
+        /// </summary>
+        /// <param name="stream">
+        /// The stream.
+        /// </param>
+        /// <returns>
+        /// The <see cref="T:System.IO.Stream" />.
+        /// </returns>
+        public override Stream ChainStream(Stream stream)
+        {
+            Logger.Debug("ChainStream");
+            this.oldStream = stream;
+            this.newStream = new MemoryStream();
+            return this.newStream;
+        }
 
         /// <inheritdoc />
         /// <summary>
@@ -84,23 +102,6 @@ namespace SoapLoggingExample.Extensions
             Logger.Debug("Initialize");
         }
 
-        /// <inheritdoc />
-        /// <summary>
-        /// The chain stream.
-        /// </summary>
-        /// <param name="stream">
-        /// The stream.
-        /// </param>
-        /// <returns>
-        /// The <see cref="T:System.IO.Stream" />.
-        /// </returns>
-        public override Stream ChainStream(Stream stream)
-        {
-            Logger.Debug("ChainStream");
-            this.requestStream = stream;
-            this.responseStream = new MemoryStream();
-            return this.responseStream;
-        }
 
         /// <inheritdoc />
         /// <summary>
@@ -117,83 +118,66 @@ namespace SoapLoggingExample.Extensions
             {
                 case SoapMessageStage.BeforeSerialize:
                     break;
-
                 case SoapMessageStage.AfterSerialize:
-                    this.PrettyXml("REQUEST");
-                    CopyStream(this.responseStream, this.requestStream);
-                    this.responseStream.Position = 0;
+                    this.WriteOutput(message);
                     break;
-
                 case SoapMessageStage.BeforeDeserialize:
-                    CopyStream(this.requestStream, this.responseStream);
-                    this.PrettyXml("RESPONSE");
+                    this.WriteInput(message);
                     break;
-
                 case SoapMessageStage.AfterDeserialize:
                     break;
-
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
         /// <summary>
+        /// The write output.
+        /// </summary>
+        /// <param name="message">
+        /// The message.
+        /// </param>
+        public void WriteOutput(SoapMessage message)
+        {
+            this.newStream.Position = 0;
+            var reader = new StreamReader(this.newStream);
+            var requestXml = reader.ReadToEnd();
+            Logger.Debug($"{"REQUEST"} | {requestXml.TrimEnd('\r', '\n') }");
+            this.newStream.Position = 0;
+            CopyStream(this.newStream, this.oldStream);
+            this.newStream.Position = 0;
+        }
+
+        /// <summary>
+        /// The write input.
+        /// </summary>
+        /// <param name="message">
+        /// The message.
+        /// </param>
+        public void WriteInput(SoapMessage message)
+        {
+            CopyStream(this.oldStream, this.newStream);
+            this.newStream.Position = 0;
+            var reader = new StreamReader(this.newStream);
+            var requestXml = reader.ReadToEnd();
+            Logger.Debug($"{"RESPONSE"} | {requestXml.TrimEnd('\r', '\n') }");
+            this.newStream.Position = 0;
+        }
+
+        /// <summary>
         /// The log.
         /// </summary>
-        /// <param name="stage">
-        /// The stage.
+        /// <param name="requestXml">
+        /// The request Xml.
         /// </param>
-        public void PrettyXml(string stage)
+        public void PrettyXml(string requestXml)
         {
-            this.responseStream.Position = 0;
-            var reader = new StreamReader(this.responseStream);
-            var requestXml = reader.ReadToEnd();
-            Logger.Debug($"{stage} | {requestXml.TrimEnd('\r', '\n') }");
-            this.responseStream.Position = 0;
+            this.newStream.Position = 0;
             if (!string.IsNullOrWhiteSpace(requestXml))
             {
                 var prettyXml = XDocument.Parse(requestXml);
                 Logger.Debug($"Formatted | \n{prettyXml}");
             }
-        }
-
-        /// <summary>
-        /// The reverse incoming stream.
-        /// </summary>
-        public void ReverseIncomingStream()
-        {
-            Logger.Debug("ReverseIncomingStream");
-            this.ReverseStream(this.responseStream);
-        }
-
-        /// <summary>
-        /// The reverse outgoing stream.
-        /// </summary>
-        public void ReverseOutgoingStream()
-        {
-            Logger.Debug("ReverseOutgoingStream");
-            this.ReverseStream(this.responseStream);
-        }
-
-        /// <summary>
-        /// The reverse stream.
-        /// </summary>
-        /// <param name="stream">
-        /// The stream.
-        /// </param>
-        public void ReverseStream(Stream stream)
-        {
-            Logger.Debug("ReverseStream");
-            TextReader tr = new StreamReader(stream);
-            var str = tr.ReadToEnd();
-            var data = str.ToCharArray();
-            Array.Reverse(data);
-            var strReversed = new string(data);
-
-            TextWriter tw = new StreamWriter(stream);
-            stream.Position = 0;
-            tw.Write(strReversed);
-            tw.Flush();
         }
 
         /// <summary>
